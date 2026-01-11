@@ -916,7 +916,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
   const [quizChoice, setQuizChoice] = useState(null);
   const [quizReveal, setQuizReveal] = useState(false);
   const [seconds, setSeconds] = useState(0);
-  const timerRef = useRef(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setDeck(buildDeck({ mode, progress, shuffleLearn: settings.shuffleLearn }));
