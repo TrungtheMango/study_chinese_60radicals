@@ -927,9 +927,13 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
   }, [mode, settings.shuffleLearn]);
 
   useEffect(() => {
-    timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
-    return () => timerRef.current && clearInterval(timerRef.current);
-  }, []);
+  timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+  return () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+  };
+}, []);
 
   const id = deck[index] ?? deck[0];
   const card = useMemo(() => RADICALS.find((r) => r.id === id) || RADICALS[0], [id]);
