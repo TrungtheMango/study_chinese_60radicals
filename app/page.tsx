@@ -597,13 +597,14 @@ function iso(d: Date): string {
   return d.toISOString();
 }
 
-function addDays(d, days) {
+function addDays(d: Date, days: number): Date {
   const x = new Date(d);
   x.setDate(x.getDate() + days);
   return x;
 }
 
-function shuffle(arr) {
+
+function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -612,7 +613,7 @@ function shuffle(arr) {
   return a;
 }
 
-function normalize(s) {
+function normalize(s: string): string {
   return (s || "")
     .toLowerCase()
     .normalize("NFD")
@@ -620,14 +621,16 @@ function normalize(s) {
     .trim();
 }
 
+
 // Leitner-ish intervals (days)
-function intervalByBox(box) {
+function intervalByBox(box: number): number {
   if (box <= 1) return 0;
   if (box === 2) return 1;
   if (box === 3) return 3;
   if (box === 4) return 7;
   return 14;
 }
+
 
 function emptyProgress() {
   const base = {};
@@ -666,13 +669,14 @@ function loadProgress() {
   }
 }
 
-function saveProgress(state) {
+function saveProgress(state: unknown): void {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(state));
   } catch {
     // ignore
   }
 }
+
 
 function useProgress() {
   const [progress, setProgress] = useState(() => loadProgress() || emptyProgress());
@@ -681,7 +685,7 @@ function useProgress() {
     saveProgress(progress);
   }, [progress]);
 
-  const patchId = (id, patch) => {
+  const patchId = (id: number, patch: any) => {
     setProgress((p) => ({
       ...p,
       byId: {
@@ -691,7 +695,7 @@ function useProgress() {
     }));
   };
 
-  const patchSettings = (patch) => {
+  const patchSettings = (patch: any) => {
     setProgress((p) => ({ ...p, settings: { ...p.settings, ...patch } }));
   };
 
@@ -730,13 +734,14 @@ const MODE_META = {
   },
 };
 
-function SmallKbd({ children }) {
+function SmallKbd({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-xl border border-slate-200 bg-white/70 px-2 py-1 text-xs text-slate-600 shadow-sm">
       {children}
     </span>
   );
 }
+
 
 function SettingsDialog({ api }) {
   const { progress, patchSettings, resetAll } = api;
