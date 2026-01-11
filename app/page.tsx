@@ -709,18 +709,16 @@ function useProgress() {
   }, [progress]);
 
   const patchId = (id: number, patch: any) => {
-    setProgress((p) => ({
-      ...p,
-      byId: {
-        ...p.byId,
-        [id]: { ...p.byId[id], ...patch },
-      },
-    }));
-  };
+  setProgress((p: ProgressState) => ({
+    ...p,
+    byId: {
+      ...p.byId,
+      [id]: { ...p.byId[id], ...patch },
+    },
+  }));
+};
 
   const patchSettings = (patch: any) => {
-    setProgress((p) => ({ ...p, settings: { ...p.settings, ...patch } }));
-  };
 
   const resetAll = () => setProgress(emptyProgress());
 
