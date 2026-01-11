@@ -43,546 +43,66 @@ import { Input } from "@/components/ui/input";
  * 6) examples: Ví dụ (từ thường gặp)
  */
 const RADICALS = [
-  {
-    id: 1,
-    vn: "Nhân",
-    radical: "人 / 亻",
-    pinyin: "rén",
-    meaning: "con người; việc liên quan người",
-    mnemonic: "nhìn như người đang đứng",
-    examples: ["你", "他", "住", "作", "休"],
-  },
-  {
-    id: 2,
-    vn: "Khẩu",
-    radical: "口",
-    pinyin: "kǒu",
-    meaning: "miệng; nói; ăn uống",
-    mnemonic: "cái miệng vuông đang mở",
-    examples: ["吃", "喝", "問", "叫", "呢"],
-  },
-  {
-    id: 3,
-    vn: "Đao",
-    radical: "刀 / 刂",
-    pinyin: "dāo",
-    meaning: "dao; cắt; xử lý",
-    mnemonic: "lưỡi dao có tay cầm",
-    examples: ["到", "別", "利", "刻", "刪"],
-  },
-  {
-    id: 4,
-    vn: "Lực",
-    radical: "力",
-    pinyin: "lì",
-    meaning: "sức; lực; cố gắng",
-    mnemonic: "cánh tay đang gồng",
-    examples: ["動", "努", "加", "助", "勞"],
-  },
-  {
-    id: 5,
-    vn: "Thổ",
-    radical: "土",
-    pinyin: "tǔ",
-    meaning: "đất; nền; địa phương",
-    mnemonic: "mặt đất + cọc đứng",
-    examples: ["地", "在", "城", "場", "境"],
-  },
-  {
-    id: 6,
-    vn: "Đại",
-    radical: "大",
-    pinyin: "dà",
-    meaning: "to; lớn",
-    mnemonic: "người dang tay chân thật rộng",
-    examples: ["天", "太", "夫", "央", "奇"],
-  },
-  {
-    id: 7,
-    vn: "Nữ",
-    radical: "女",
-    pinyin: "nǚ",
-    meaning: "phụ nữ; nữ",
-    mnemonic: "người phụ nữ ngồi",
-    examples: ["好", "媽", "姐", "妹", "姓"],
-  },
-  {
-    id: 8,
-    vn: "Tử",
-    radical: "子",
-    pinyin: "zǐ",
-    meaning: "con; trẻ em",
-    mnemonic: "em bé dang tay",
-    examples: ["字", "孩", "孔", "孫", "學"],
-  },
-  {
-    id: 9,
-    vn: "Miên",
-    radical: "宀",
-    pinyin: "mián",
-    meaning: "mái nhà; trong nhà",
-    mnemonic: "mái che phía trên",
-    examples: ["家", "安", "室", "客", "宿"],
-  },
-  {
-    id: 10,
-    vn: "Sơn",
-    radical: "山",
-    pinyin: "shān",
-    meaning: "núi",
-    mnemonic: "ba đỉnh núi",
-    examples: ["出", "島", "岩", "峰", "岸"],
-  },
-  {
-    id: 11,
-    vn: "Nhật",
-    radical: "日",
-    pinyin: "rì",
-    meaning: "mặt trời; ngày",
-    mnemonic: "mặt trời hình ô vuông",
-    examples: ["明", "時", "早", "晚", "星"],
-  },
-  {
-    id: 12,
-    vn: "Nguyệt",
-    radical: "月",
-    pinyin: "yuè",
-    meaning: "mặt trăng; tháng (đôi khi gợi bộ phận cơ thể)",
-    mnemonic: "mặt trăng cong",
-    examples: ["服", "期", "朋", "腦", "腳"],
-  },
-  {
-    id: 13,
-    vn: "Mộc",
-    radical: "木",
-    pinyin: "mù",
-    meaning: "cây; gỗ",
-    mnemonic: "thân cây + cành",
-    examples: ["林", "森", "桌", "校", "杯"],
-  },
-  {
-    id: 14,
-    vn: "Thủy",
-    radical: "水 / 氵",
-    pinyin: "shuǐ",
-    meaning: "nước; chất lỏng",
-    mnemonic: "dòng nước chảy",
-    examples: ["河", "海", "洗", "酒", "游"],
-  },
-  {
-    id: 15,
-    vn: "Hỏa",
-    radical: "火 / 灬",
-    pinyin: "huǒ",
-    meaning: "lửa; nóng; nấu",
-    mnemonic: "ngọn lửa bốc lên",
-    examples: ["熱", "燈", "煮", "然", "煙"],
-  },
-  {
-    id: 16,
-    vn: "Ngưu",
-    radical: "牛",
-    pinyin: "niú",
-    meaning: "trâu/bò",
-    mnemonic: "đầu bò có sừng",
-    examples: ["物", "特", "牽", "牧", "犧"],
-  },
-  {
-    id: 17,
-    vn: "Khuyển",
-    radical: "犬 / 犭",
-    pinyin: "quǎn",
-    meaning: "chó; thú",
-    mnemonic: "con chó có đuôi",
-    examples: ["狗", "獨", "獎", "猶", "獵"],
-  },
-  {
-    id: 18,
-    vn: "Điền",
-    radical: "田",
-    pinyin: "tián",
-    meaning: "ruộng; ô/khu",
-    mnemonic: "ruộng chia 4 ô",
-    examples: ["男", "界", "留", "當", "畫"],
-  },
-  {
-    id: 19,
-    vn: "Mục",
-    radical: "目",
-    pinyin: "mù",
-    meaning: "mắt; nhìn",
-    mnemonic: "con mắt có đồng tử",
-    examples: ["看", "相", "眼", "直", "睡"],
-  },
-  {
-    id: 20,
-    vn: "Thạch",
-    radical: "石",
-    pinyin: "shí",
-    meaning: "đá; cứng; khoáng",
-    mnemonic: "hòn đá dưới chân núi",
-    examples: ["硬", "破", "碗", "礦", "碼"],
-  },
-  {
-    id: 21,
-    vn: "Hòa",
-    radical: "禾",
-    pinyin: "hé",
-    meaning: "lúa; mùa vụ",
-    mnemonic: "bông lúa có hạt",
-    examples: ["秋", "種", "科", "稅", "穩"],
-  },
-  {
-    id: 22,
-    vn: "Trúc",
-    radical: "竹 / ⺮",
-    pinyin: "zhú",
-    meaning: "tre; đồ tre; bút/sách",
-    mnemonic: "hai thân tre song song",
-    examples: ["筆", "笑", "等", "箱", "簡"],
-  },
-  {
-    id: 23,
-    vn: "Mễ",
-    radical: "米",
-    pinyin: "mǐ",
-    meaning: "gạo; hạt; bột",
-    mnemonic: "hạt gạo tỏa ra",
-    examples: ["粉", "糖", "精", "糧", "粥"],
-  },
-  {
-    id: 24,
-    vn: "Thảo",
-    radical: "艸 / 艹",
-    pinyin: "cǎo",
-    meaning: "cỏ; thảo mộc",
-    mnemonic: "cỏ mọc trên đầu chữ",
-    examples: ["花", "茶", "菜", "藥", "草"],
-  },
-  {
-    id: 25,
-    vn: "Trùng",
-    radical: "虫",
-    pinyin: "chóng",
-    meaning: "côn trùng; sâu",
-    mnemonic: "con sâu có đầu",
-    examples: ["蛇", "蝦", "蜂", "蚊", "蛋"],
-  },
-  {
-    id: 26,
-    vn: "Y",
-    radical: "衣 / 衤",
-    pinyin: "yī",
-    meaning: "quần áo; mặc",
-    mnemonic: "áo choàng phủ người",
-    examples: ["被", "褲", "裙", "裝", "補"],
-  },
-  {
-    id: 27,
-    vn: "Ngôn",
-    radical: "言 / 訁",
-    pinyin: "yán",
-    meaning: "lời nói; ngôn ngữ",
-    mnemonic: "miệng phát ra lời",
-    examples: ["話", "說", "謝", "請", "認"],
-  },
-  {
-    id: 28,
-    vn: "Tâm",
-    radical: "心 / 忄",
-    pinyin: "xīn",
-    meaning: "tim; cảm xúc; nghĩ",
-    mnemonic: "trái tim 3 nhịp",
-    examples: ["想", "忙", "快", "愛", "情"],
-  },
-  {
-    id: 29,
-    vn: "Bối",
-    radical: "貝",
-    pinyin: "bèi",
-    meaning: "tiền; của cải",
-    mnemonic: "vỏ sò cổ đại = tiền",
-    examples: ["買", "貴", "財", "費", "貿"],
-  },
-  {
-    id: 30,
-    vn: "Túc",
-    radical: "足 / ⻊",
-    pinyin: "zú",
-    meaning: "chân; đi; đủ",
-    mnemonic: "bàn chân bước đi",
-    examples: ["路", "跑", "跟", "距", "跳"],
-  },
-  {
-    id: 31,
-    vn: "Xa",
-    radical: "車",
-    pinyin: "chē",
-    meaning: "xe; phương tiện",
-    mnemonic: "khung xe + bánh",
-    examples: ["開", "軍", "轉", "輪", "輕"],
-  },
-  {
-    id: 32,
-    vn: "Sước",
-    radical: "辶",
-    pinyin: "chuò",
-    meaning: "đi lại; đường; đến",
-    mnemonic: "đường cong + bước",
-    examples: ["這", "進", "近", "遠", "還"],
-  },
-  {
-    id: 33,
-    vn: "Ấp",
-    radical: "邑 / 阝(phải)",
-    pinyin: "yì",
-    meaning: "làng/thành; nơi chốn",
-    mnemonic: "khu dân cư có tường",
-    examples: ["都", "郵", "郊", "鄉", "鄰"],
-  },
-  {
-    id: 34,
-    vn: "Phụ",
-    radical: "阜 / 阝(trái)",
-    pinyin: "fù",
-    meaning: "gò/đồi; bậc",
-    mnemonic: "bậc thềm/đống đất",
-    examples: ["陸", "階", "降", "隊", "陽"],
-  },
-  {
-    id: 35,
-    vn: "Kim",
-    radical: "金",
-    pinyin: "jīn",
-    meaning: "kim loại; vàng",
-    mnemonic: "kim loại lấp lánh",
-    examples: ["錢", "銀", "鐵", "鐘", "銷"],
-  },
-  {
-    id: 36,
-    vn: "Môn",
-    radical: "門",
-    pinyin: "mén",
-    meaning: "cửa; cổng",
-    mnemonic: "hai cánh cửa",
-    examples: ["開", "間", "聞", "閃", "閉"],
-  },
-  {
-    id: 37,
-    vn: "Vũ",
-    radical: "雨",
-    pinyin: "yǔ",
-    meaning: "mưa; thời tiết",
-    mnemonic: "mây + giọt mưa",
-    examples: ["雪", "雷", "雲", "霧", "露"],
-  },
-  {
-    id: 38,
-    vn: "Thực",
-    radical: "食 / 飠",
-    pinyin: "shí",
-    meaning: "ăn; thức ăn",
-    mnemonic: "miệng + đồ ăn",
-    examples: ["飯", "餓", "館", "飲", "餅"],
-  },
-  {
-    id: 39,
-    vn: "Mã",
-    radical: "馬",
-    pinyin: "mǎ",
-    meaning: "ngựa",
-    mnemonic: "ngựa có bờm",
-    examples: ["騎", "驚", "駕", "驗", "驛"],
-  },
-  {
-    id: 40,
-    vn: "Ngư",
-    radical: "魚",
-    pinyin: "yú",
-    meaning: "cá",
-    mnemonic: "cá có vây",
-    examples: ["鮮", "鯨", "鰻", "鱗", "魯"],
-  },
-  {
-    id: 41,
-    vn: "Điểu",
-    radical: "鳥",
-    pinyin: "niǎo",
-    meaning: "chim",
-    mnemonic: "chim có mỏ",
-    examples: ["鳴", "鴨", "雞", "鷹", "鴿"],
-  },
-  {
-    id: 42,
-    vn: "Quảng",
-    radical: "广",
-    pinyin: "guǎng",
-    meaning: "mái che; tòa nhà",
-    mnemonic: "mái nghiêng",
-    examples: ["店", "床", "庫", "廳", "府"],
-  },
-  {
-    id: 43,
-    vn: "Hiệt",
-    radical: "頁",
-    pinyin: "yè",
-    meaning: "đầu; mặt",
-    mnemonic: "đầu người nghiêng",
-    examples: ["顏", "額", "順", "題", "頭"],
-  },
-  {
-    id: 44,
-    vn: "Công",
-    radical: "工",
-    pinyin: "gōng",
-    meaning: "công việc; kỹ thuật",
-    mnemonic: "khung dụng cụ",
-    examples: ["作", "功", "江", "紅", "巧"],
-  },
-  {
-    id: 45,
-    vn: "Phộc",
-    radical: "攴 / 攵",
-    pinyin: "pū",
-    meaning: "đánh/tác động; sửa đổi",
-    mnemonic: "tay cầm que gõ",
-    examples: ["改", "教", "收", "攻", "政"],
-  },
-  {
-    id: 46,
-    vn: "Thị",
-    radical: "示 / 礻",
-    pinyin: "shì",
-    meaning: "lễ; thờ; phúc",
-    mnemonic: "bàn thờ nhỏ",
-    examples: ["神", "福", "祝", "禮", "祖"],
-  },
-  {
-    id: 47,
-    vn: "Ty",
-    radical: "糸 / 糹",
-    pinyin: "mì",
-    meaning: "sợi; dệt; liên kết",
-    mnemonic: "cuộn chỉ",
-    examples: ["經", "線", "結", "級", "續"],
-  },
-  {
-    id: 48,
-    vn: "Tẩu",
-    radical: "走",
-    pinyin: "zǒu",
-    meaning: "đi; chạy",
-    mnemonic: "người chạy nghiêng",
-    examples: ["起", "超", "赴", "趕", "越"],
-  },
-  {
-    id: 49,
-    vn: "Thập",
-    radical: "十",
-    pinyin: "shí",
-    meaning: "mười; dấu cộng",
-    mnemonic: "cắt ngang ở giữa",
-    examples: ["千", "協", "博", "南", "十"],
-  },
-  {
-    id: 50,
-    vn: "Bát",
-    radical: "八",
-    pinyin: "bā",
-    meaning: "tách ra; chia",
-    mnemonic: "hai nét tách đôi",
-    examples: ["分", "公", "共", "兵", "其"],
-  },
-  {
-    id: 51,
-    vn: "Hựu",
-    radical: "又",
-    pinyin: "yòu",
-    meaning: "tay; lại nữa",
-    mnemonic: "bàn tay phải",
-    examples: ["友", "取", "受", "雙", "反"],
-  },
-  {
-    id: 52,
-    vn: "Nhục",
-    radical: "肉 / ⺼",
-    pinyin: "ròu",
-    meaning: "thịt; thân thể",
-    mnemonic: "miếng thịt có vân",
-    examples: ["肥", "腸", "胃", "腳", "腦"],
-  },
-  {
-    id: 53,
-    vn: "Cân",
-    radical: "巾",
-    pinyin: "jīn",
-    meaning: "khăn; vải",
-    mnemonic: "khăn treo xuống",
-    examples: ["布", "帽", "帆", "帳", "幫"],
-  },
-  {
-    id: 54,
-    vn: "Huyệt",
-    radical: "穴",
-    pinyin: "xué",
-    meaning: "hang; lỗ; chỗ trống",
-    mnemonic: "mái che + lỗ",
-    examples: ["空", "窗", "究", "穿", "窄"],
-  },
-  {
-    id: 55,
-    vn: "Phương",
-    radical: "方",
-    pinyin: "fāng",
-    meaning: "hướng; cách; phương",
-    mnemonic: "tấm bảng vuông",
-    examples: ["房", "旅", "族", "放", "方法"],
-  },
-  {
-    id: 56,
-    vn: "Lão",
-    radical: "老",
-    pinyin: "lǎo",
-    meaning: "già; cũ",
-    mnemonic: "người già chống gậy",
-    examples: ["考", "者", "老師", "孝"],
-  },
-  {
-    id: 57,
-    vn: "Thần",
-    radical: "辰",
-    pinyin: "chén",
-    meaning: "buổi sớm; thời điểm",
-    mnemonic: "mặt trời vừa nhú",
-    examples: ["晨", "農", "辱"],
-  },
-  {
-    id: 58,
-    vn: "Cung",
-    radical: "弓",
-    pinyin: "gōng",
-    meaning: "cung; kéo",
-    mnemonic: "cây cung cong",
-    examples: ["強", "張", "引", "彈"],
-  },
-  {
-    id: 59,
-    vn: "Bạch",
-    radical: "白",
-    pinyin: "bái",
-    meaning: "trắng; sáng; rõ",
-    mnemonic: "ánh sáng trong ô",
-    examples: ["明白", "百", "皆", "皂"],
-  },
-  {
-    id: 60,
-    vn: "Hộ",
-    radical: "戶",
-    pinyin: "hù",
-    meaning: "cửa nhà; hộ gia đình",
-    mnemonic: "cánh cửa nhìn nghiêng",
-    examples: ["所", "房", "扇", "戶口"],
-  },
+  { id: 1, vn: "Nhân", radical: "人 / 亻", pinyin: "rén", meaning: "con người; việc liên quan người", mnemonic: "nhìn như người đang đứng", examples: ["你", "他", "住", "作", "休"] },
+  { id: 2, vn: "Khẩu", radical: "口", pinyin: "kǒu", meaning: "miệng; nói; ăn uống", mnemonic: "cái miệng vuông đang mở", examples: ["吃", "喝", "問", "叫", "呢"] },
+  { id: 3, vn: "Đao", radical: "刀 / 刂", pinyin: "dāo", meaning: "dao; cắt; xử lý", mnemonic: "lưỡi dao có tay cầm", examples: ["到", "別", "利", "刻", "刪"] },
+  { id: 4, vn: "Lực", radical: "力", pinyin: "lì", meaning: "sức; lực; cố gắng", mnemonic: "cánh tay đang gồng", examples: ["動", "努", "加", "助", "勞"] },
+  { id: 5, vn: "Thổ", radical: "土", pinyin: "tǔ", meaning: "đất; nền; địa phương", mnemonic: "mặt đất + cọc đứng", examples: ["地", "在", "城", "場", "境"] },
+  { id: 6, vn: "Đại", radical: "大", pinyin: "dà", meaning: "to; lớn", mnemonic: "người dang tay chân thật rộng", examples: ["天", "太", "夫", "央", "奇"] },
+  { id: 7, vn: "Nữ", radical: "女", pinyin: "nǚ", meaning: "phụ nữ; nữ", mnemonic: "người phụ nữ ngồi", examples: ["好", "媽", "姐", "妹", "姓"] },
+  { id: 8, vn: "Tử", radical: "子", pinyin: "zǐ", meaning: "con; trẻ em", mnemonic: "em bé dang tay", examples: ["字", "孩", "孔", "孫", "學"] },
+  { id: 9, vn: "Miên", radical: "宀", pinyin: "mián", meaning: "mái nhà; trong nhà", mnemonic: "mái che phía trên", examples: ["家", "安", "室", "客", "宿"] },
+  { id: 10, vn: "Sơn", radical: "山", pinyin: "shān", meaning: "núi", mnemonic: "ba đỉnh núi", examples: ["出", "島", "岩", "峰", "岸"] },
+  { id: 11, vn: "Nhật", radical: "日", pinyin: "rì", meaning: "mặt trời; ngày", mnemonic: "mặt trời hình ô vuông", examples: ["明", "時", "早", "晚", "星"] },
+  { id: 12, vn: "Nguyệt", radical: "月", pinyin: "yuè", meaning: "mặt trăng; tháng (đôi khi gợi bộ phận cơ thể)", mnemonic: "mặt trăng cong", examples: ["服", "期", "朋", "腦", "腳"] },
+  { id: 13, vn: "Mộc", radical: "木", pinyin: "mù", meaning: "cây; gỗ", mnemonic: "thân cây + cành", examples: ["林", "森", "桌", "校", "杯"] },
+  { id: 14, vn: "Thủy", radical: "水 / 氵", pinyin: "shuǐ", meaning: "nước; chất lỏng", mnemonic: "dòng nước chảy", examples: ["河", "海", "洗", "酒", "游"] },
+  { id: 15, vn: "Hỏa", radical: "火 / 灬", pinyin: "huǒ", meaning: "lửa; nóng; nấu", mnemonic: "ngọn lửa bốc lên", examples: ["熱", "燈", "煮", "然", "煙"] },
+  { id: 16, vn: "Ngưu", radical: "牛", pinyin: "niú", meaning: "trâu/bò", mnemonic: "đầu bò có sừng", examples: ["物", "特", "牽", "牧", "犧"] },
+  { id: 17, vn: "Khuyển", radical: "犬 / 犭", pinyin: "quǎn", meaning: "chó; thú", mnemonic: "con chó có đuôi", examples: ["狗", "獨", "獎", "猶", "獵"] },
+  { id: 18, vn: "Điền", radical: "田", pinyin: "tián", meaning: "ruộng; ô/khu", mnemonic: "ruộng chia 4 ô", examples: ["男", "界", "留", "當", "畫"] },
+  { id: 19, vn: "Mục", radical: "目", pinyin: "mù", meaning: "mắt; nhìn", mnemonic: "con mắt có đồng tử", examples: ["看", "相", "眼", "直", "睡"] },
+  { id: 20, vn: "Thạch", radical: "石", pinyin: "shí", meaning: "đá; cứng; khoáng", mnemonic: "hòn đá dưới chân núi", examples: ["硬", "破", "碗", "礦", "碼"] },
+  { id: 21, vn: "Hòa", radical: "禾", pinyin: "hé", meaning: "lúa; mùa vụ", mnemonic: "bông lúa có hạt", examples: ["秋", "種", "科", "稅", "穩"] },
+  { id: 22, vn: "Trúc", radical: "竹 / ⺮", pinyin: "zhú", meaning: "tre; đồ tre; bút/sách", mnemonic: "hai thân tre song song", examples: ["筆", "笑", "等", "箱", "簡"] },
+  { id: 23, vn: "Mễ", radical: "米", pinyin: "mǐ", meaning: "gạo; hạt; bột", mnemonic: "hạt gạo tỏa ra", examples: ["粉", "糖", "精", "糧", "粥"] },
+  { id: 24, vn: "Thảo", radical: "艸 / 艹", pinyin: "cǎo", meaning: "cỏ; thảo mộc", mnemonic: "cỏ mọc trên đầu chữ", examples: ["花", "茶", "菜", "藥", "草"] },
+  { id: 25, vn: "Trùng", radical: "虫", pinyin: "chóng", meaning: "côn trùng; sâu", mnemonic: "con sâu có đầu", examples: ["蛇", "蝦", "蜂", "蚊", "蛋"] },
+  { id: 26, vn: "Y", radical: "衣 / 衤", pinyin: "yī", meaning: "quần áo; mặc", mnemonic: "áo choàng phủ người", examples: ["被", "褲", "裙", "裝", "補"] },
+  { id: 27, vn: "Ngôn", radical: "言 / 訁", pinyin: "yán", meaning: "lời nói; ngôn ngữ", mnemonic: "miệng phát ra lời", examples: ["話", "說", "謝", "請", "認"] },
+  { id: 28, vn: "Tâm", radical: "心 / 忄", pinyin: "xīn", meaning: "tim; cảm xúc; nghĩ", mnemonic: "trái tim 3 nhịp", examples: ["想", "忙", "快", "愛", "情"] },
+  { id: 29, vn: "Bối", radical: "貝", pinyin: "bèi", meaning: "tiền; của cải", mnemonic: "vỏ sò cổ đại = tiền", examples: ["買", "貴", "財", "費", "貿"] },
+  { id: 30, vn: "Túc", radical: "足 / ⻊", pinyin: "zú", meaning: "chân; đi; đủ", mnemonic: "bàn chân bước đi", examples: ["路", "跑", "跟", "距", "跳"] },
+  { id: 31, vn: "Xa", radical: "車", pinyin: "chē", meaning: "xe; phương tiện", mnemonic: "khung xe + bánh", examples: ["開", "軍", "轉", "輪", "輕"] },
+  { id: 32, vn: "Sước", radical: "辶", pinyin: "chuò", meaning: "đi lại; đường; đến", mnemonic: "đường cong + bước", examples: ["這", "進", "近", "遠", "還"] },
+  { id: 33, vn: "Ấp", radical: "邑 / 阝(phải)", pinyin: "yì", meaning: "làng/thành; nơi chốn", mnemonic: "khu dân cư có tường", examples: ["都", "郵", "郊", "鄉", "鄰"] },
+  { id: 34, vn: "Phụ", radical: "阜 / 阝(trái)", pinyin: "fù", meaning: "gò/đồi; bậc", mnemonic: "bậc thềm/đống đất", examples: ["陸", "階", "降", "隊", "陽"] },
+  { id: 35, vn: "Kim", radical: "金", pinyin: "jīn", meaning: "kim loại; vàng", mnemonic: "kim loại lấp lánh", examples: ["錢", "銀", "鐵", "鐘", "銷"] },
+  { id: 36, vn: "Môn", radical: "門", pinyin: "mén", meaning: "cửa; cổng", mnemonic: "hai cánh cửa", examples: ["開", "間", "聞", "閃", "閉"] },
+  { id: 37, vn: "Vũ", radical: "雨", pinyin: "yǔ", meaning: "mưa; thời tiết", mnemonic: "mây + giọt mưa", examples: ["雪", "雷", "雲", "霧", "露"] },
+  { id: 38, vn: "Thực", radical: "食 / 飠", pinyin: "shí", meaning: "ăn; thức ăn", mnemonic: "miệng + đồ ăn", examples: ["飯", "餓", "館", "飲", "餅"] },
+  { id: 39, vn: "Mã", radical: "馬", pinyin: "mǎ", meaning: "ngựa", mnemonic: "ngựa có bờm", examples: ["騎", "驚", "駕", "驗", "驛"] },
+  { id: 40, vn: "Ngư", radical: "魚", pinyin: "yú", meaning: "cá", mnemonic: "cá có vây", examples: ["鮮", "鯨", "鰻", "鱗", "魯"] },
+  { id: 41, vn: "Điểu", radical: "鳥", pinyin: "niǎo", meaning: "chim", mnemonic: "chim có mỏ", examples: ["鳴", "鴨", "雞", "鷹", "鴿"] },
+  { id: 42, vn: "Quảng", radical: "广", pinyin: "guǎng", meaning: "mái che; tòa nhà", mnemonic: "mái nghiêng", examples: ["店", "床", "庫", "廳", "府"] },
+  { id: 43, vn: "Hiệt", radical: "頁", pinyin: "yè", meaning: "đầu; mặt", mnemonic: "đầu người nghiêng", examples: ["顏", "額", "順", "題", "頭"] },
+  { id: 44, vn: "Công", radical: "工", pinyin: "gōng", meaning: "công việc; kỹ thuật", mnemonic: "khung dụng cụ", examples: ["作", "功", "江", "紅", "巧"] },
+  { id: 45, vn: "Phộc", radical: "攴 / 攵", pinyin: "pū", meaning: "đánh/tác động; sửa đổi", mnemonic: "tay cầm que gõ", examples: ["改", "教", "收", "攻", "政"] },
+  { id: 46, vn: "Thị", radical: "示 / 礻", pinyin: "shì", meaning: "lễ; thờ; phúc", mnemonic: "bàn thờ nhỏ", examples: ["神", "福", "祝", "禮", "祖"] },
+  { id: 47, vn: "Ty", radical: "糸 / 糹", pinyin: "mì", meaning: "sợi; dệt; liên kết", mnemonic: "cuộn chỉ", examples: ["經", "線", "結", "級", "續"] },
+  { id: 48, vn: "Tẩu", radical: "走", pinyin: "zǒu", meaning: "đi; chạy", mnemonic: "người chạy nghiêng", examples: ["起", "超", "赴", "趕", "越"] },
+  { id: 49, vn: "Thập", radical: "十", pinyin: "shí", meaning: "mười; dấu cộng", mnemonic: "cắt ngang ở giữa", examples: ["千", "協", "博", "南", "十"] },
+  { id: 50, vn: "Bát", radical: "八", pinyin: "bā", meaning: "tách ra; chia", mnemonic: "hai nét tách đôi", examples: ["分", "公", "共", "兵", "其"] },
+  { id: 51, vn: "Hựu", radical: "又", pinyin: "yòu", meaning: "tay; lại nữa", mnemonic: "bàn tay phải", examples: ["友", "取", "受", "雙", "反"] },
+  { id: 52, vn: "Nhục", radical: "肉 / ⺼", pinyin: "ròu", meaning: "thịt; thân thể", mnemonic: "miếng thịt có vân", examples: ["肥", "腸", "胃", "腳", "腦"] },
+  { id: 53, vn: "Cân", radical: "巾", pinyin: "jīn", meaning: "khăn; vải", mnemonic: "khăn treo xuống", examples: ["布", "帽", "帆", "帳", "幫"] },
+  { id: 54, vn: "Huyệt", radical: "穴", pinyin: "xué", meaning: "hang; lỗ; chỗ trống", mnemonic: "mái che + lỗ", examples: ["空", "窗", "究", "穿", "窄"] },
+  { id: 55, vn: "Phương", radical: "方", pinyin: "fāng", meaning: "hướng; cách; phương", mnemonic: "tấm bảng vuông", examples: ["房", "旅", "族", "放", "方法"] },
+  { id: 56, vn: "Lão", radical: "老", pinyin: "lǎo", meaning: "già; cũ", mnemonic: "người già chống gậy", examples: ["考", "者", "老師", "孝"] },
+  { id: 57, vn: "Thần", radical: "辰", pinyin: "chén", meaning: "buổi sớm; thời điểm", mnemonic: "mặt trời vừa nhú", examples: ["晨", "農", "辱"] },
+  { id: 58, vn: "Cung", radical: "弓", pinyin: "gōng", meaning: "cung; kéo", mnemonic: "cây cung cong", examples: ["強", "張", "引", "彈"] },
+  { id: 59, vn: "Bạch", radical: "白", pinyin: "bái", meaning: "trắng; sáng; rõ", mnemonic: "ánh sáng trong ô", examples: ["明白", "百", "皆", "皂"] },
+  { id: 60, vn: "Hộ", radical: "戶", pinyin: "hù", meaning: "cửa nhà; hộ gia đình", mnemonic: "cánh cửa nhìn nghiêng", examples: ["所", "房", "扇", "戶口"] },
 ];
 
 // ---- LocalStorage ----
@@ -870,10 +390,6 @@ function formatPinyin(r: typeof RADICALS[0], toneMarks: boolean) {
   return toneMarks ? r.pinyin : normalize(r.pinyin);
 }
 
-// 1 Again: box=1
-// 2 Hard: box stays
-// 3 Good: box +1
-// 4 Easy: box +2
 function applyGrade(currentBox: number, grade: number) {
   if (grade === 1) return 1;
   if (grade === 2) return Math.max(1, currentBox);
@@ -884,9 +400,7 @@ function applyGrade(currentBox: number, grade: number) {
 function buildDeck({ mode, progress, shuffleLearn }: { mode: ModeType; progress: ProgressState; shuffleLearn: boolean }) {
   const idsAll = RADICALS.map((r) => r.id);
 
-  if (mode === "learn") {
-    return shuffleLearn ? shuffle(idsAll) : idsAll;
-  }
+  if (mode === "learn") return shuffleLearn ? shuffle(idsAll) : idsAll;
 
   if (mode === "review") {
     const t = todayStart();
@@ -906,7 +420,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
 
-  // --- QUIZ STATES (mới) ---
+  // --- QUIZ ---
   const [quizChoice, setQuizChoice] = useState<string | null>(null);
   const [quizReveal, setQuizReveal] = useState(false);
   const [quizIsCorrect, setQuizIsCorrect] = useState<boolean | null>(null);
@@ -920,7 +434,6 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
     setIndex(0);
     setFlipped(false);
 
-    // reset quiz mỗi lần đổi mode hoặc shuffleLearn
     setQuizChoice(null);
     setQuizReveal(false);
     setQuizIsCorrect(null);
@@ -930,9 +443,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
   useEffect(() => {
     timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 
@@ -947,9 +458,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
     if (mode !== "quiz") return null;
     const correct = card.meaning;
     const pool = RADICALS.filter((r) => r.id !== card.id);
-    const opts = shuffle(pool)
-      .slice(0, 3)
-      .map((r) => r.meaning);
+    const opts = shuffle(pool).slice(0, 3).map((r) => r.meaning);
     const options = shuffle([correct, ...opts]);
     return { correct, options };
   }, [mode, card.id]);
@@ -962,7 +471,6 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
     setIndex((i) => (i + 1 < deck.length ? i + 1 : 0));
   };
 
-  // dùng cho learn/review: chấm điểm + sang thẻ kế
   const gradeAndNext = (g: number) => {
     const currentBox = pr.box || 1;
     const nextBox = applyGrade(currentBox, g);
@@ -981,9 +489,8 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
     goNext();
   };
 
-  // dùng cho quiz: ghi kết quả vào progress nhưng KHÔNG tự sang thẻ (chỉ sang khi bấm "Tiếp")
   const recordQuizResult = (isCorrect: boolean) => {
-    const g = isCorrect ? 3 : 1; // đúng: tương đương "Good", sai: "Again"
+    const g = isCorrect ? 3 : 1;
     const currentBox = pr.box || 1;
     const nextBox = applyGrade(currentBox, g);
     const t = todayStart();
@@ -1032,14 +539,12 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
     setQuizReveal(true);
     setQuizIsCorrect(ok);
 
-    // tính đúng/sai của "lần kiểm tra" (session) chính xác
     setQuizSession((s) => ({
       total: s.total + 1,
       correct: s.correct + (ok ? 1 : 0),
       wrong: s.wrong + (ok ? 0 : 1),
     }));
 
-    // ghi vào progress ngay lúc nộp (tránh trường hợp nộp rồi thoát mà không bấm Tiếp)
     recordQuizResult(ok);
   };
 
@@ -1178,22 +683,20 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                         const picked = quizChoice === opt;
                         const isCorrectOpt = opt === quiz.correct;
 
-                        // sau khi nộp:
                         const showCorrect = quizReveal && isCorrectOpt;
                         const showWrongPicked = quizReveal && picked && !isCorrectOpt;
                         const showPickedCorrect = quizReveal && picked && isCorrectOpt;
 
                         const base = "rounded-2xl border p-3 text-left transition";
 
-                        // trước khi nộp: option được chọn phải nổi bật (sáng màu hơn)
+                        // ✅ yêu cầu mới: khi chọn (chưa nộp) thì sáng BLUE
                         const beforeReveal =
                           !quizReveal && picked
-                            ? " border-slate-400 bg-slate-50 ring-2 ring-slate-200"
+                            ? " border-sky-300 bg-sky-50 ring-2 ring-sky-200"
                             : !quizReveal
                             ? " border-slate-200 bg-white hover:bg-slate-50"
                             : " border-slate-200 bg-white";
 
-                        // sau khi nộp: xanh cho đúng, đỏ cho lựa chọn sai
                         const afterReveal =
                           quizReveal && showCorrect
                             ? " border-emerald-200 bg-emerald-50"
@@ -1201,7 +704,6 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                             ? " border-rose-200 bg-rose-50"
                             : "";
 
-                        // nếu chọn đúng, nhấn mạnh thêm
                         const afterRevealEmphasis = quizReveal && showPickedCorrect ? " ring-2 ring-emerald-200" : "";
 
                         return (
@@ -1228,10 +730,15 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                     {quizReveal && (
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="text-sm font-semibold text-slate-900">
-                            {quizIsCorrect ? "Đúng rồi ✅" : "Sai rồi ❌"}
-                          </div>
-                          <Badge className={`rounded-2xl border ${quizIsCorrect ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
+                          <div className="text-sm font-semibold text-slate-900">{quizIsCorrect ? "Đúng rồi ✅" : "Sai rồi ❌"}</div>
+                          <Badge
+                            className={
+                              `rounded-2xl border ` +
+                              (quizIsCorrect
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                : "border-rose-200 bg-rose-50 text-rose-700")
+                            }
+                          >
                             {quizIsCorrect ? "Correct" : "Wrong"}
                           </Badge>
                         </div>
@@ -1301,7 +808,6 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
               <Timer className={`h-5 w-5 ${theme.icon}`} />
               Thông tin
             </CardTitle>
-            <div className="text-sm text-slate-600">Nhẹ, tập trung, nhưng có màu để dễ nhìn hơn.</div>
           </CardHeader>
 
           <CardContent className="space-y-3">
@@ -1464,7 +970,6 @@ export default function Radicals60StudySite() {
             </div>
             <div>
               <div className="text-2xl font-semibold tracking-tight">60 Bộ thủ thông dụng</div>
-              <div className="mt-1 text-sm text-slate-600">Giao diện study mode gọn, có điểm nhấn màu để dễ tập trung.</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -1558,7 +1063,7 @@ export default function Radicals60StudySite() {
               <Card className="rounded-2xl shadow-sm border-slate-200 bg-white/80">
                 <CardHeader className="space-y-2">
                   <CardTitle className="text-lg">Tiến độ</CardTitle>
-                  <div className="text-sm text-slate-600">Tự lưu trên máy bạn.</div>
+                  <div className="text-sm text-slate-600">Lưu trên máy bạn.</div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -1570,7 +1075,7 @@ export default function Radicals60StudySite() {
                     <div className="mt-1 text-2xl font-semibold">{dueCount}</div>
                   </div>
                   <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <div className="text-sm text-slate-600">Chế độ gợi ý</div>
+                    <div className="text-sm text-slate-600">Gợi ý</div>
                     <div className="mt-1 text-sm text-slate-800">{dueCount ? "Bạn nên vào Ôn trước." : "Bạn có thể vào Học hoặc Kiểm tra."}</div>
                   </div>
                 </CardContent>
@@ -1623,10 +1128,6 @@ export default function Radicals60StudySite() {
                       Danh sách
                     </Button>
                   </div>
-
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                    Mình đã thêm màu nhấn để mắt dễ bám vào thông tin (mà không bị rối).
-                  </div>
                 </CardContent>
               </Card>
 
@@ -1663,8 +1164,13 @@ export default function Radicals60StudySite() {
           {page === "list" && <ManageList api={api} onBack={() => setPage("home")} />}
         </div>
 
-        <div className="mt-8 rounded-2xl border border-slate-200 bg-white/70 p-4 text-sm text-slate-600">
-          Tip: Nếu bạn muốn màu mạnh hơn hoặc đổi tone (xanh lá, xanh dương, tím), nói mình biết tone bạn thích.
+        {/* ✅ CREDIT (footer gọn, phù hợp để deploy) */}
+        <div className="mt-10 flex items-center justify-center">
+          <div className="rounded-2xl border border-slate-200 bg-white/70 px-4 py-2 text-sm text-slate-600">
+            Created by <span className="font-semibold text-slate-900">TrungtheMango</span>
+            <span className="mx-2 text-slate-300">•</span>
+            IG: <span className="font-semibold text-slate-900">trung_the_mango</span>
+          </div>
         </div>
       </div>
     </div>
