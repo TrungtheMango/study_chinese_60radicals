@@ -1169,7 +1169,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                   ) : (
                     <div className="space-y-2">
                       <div className="text-sm text-slate-600">Đáp án đúng</div>
-                      <div className="font-semibold text-slate-900">{quiz.correct}</div>
+                      <div className="font-semibold text-slate-900">{quiz?.correct}</div>
                       <Button className={`rounded-2xl ${theme.solid}`} onClick={nextQuiz}>
                         Tiếp
                       </Button>
