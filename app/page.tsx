@@ -652,6 +652,13 @@ type ProgressState = {
   };
 };
 
+type UseProgressReturn = {
+  progress: ProgressState;
+  patchId: (id: number, patch: any) => void;
+  patchSettings: (patch: any) => void;
+  resetAll: () => void;
+};
+
 function emptyProgress(): ProgressState {
   const base: Record<number, ProgressItem> = {};
   const t = todayStart();
@@ -766,7 +773,7 @@ function SmallKbd({ children }: { children: React.ReactNode }) {
 }
 
 
-function SettingsDialog({ api }) {
+function SettingsDialog({ api }: { api: UseProgressReturn }) {
   const { progress, patchSettings, resetAll } = api;
   const s = progress.settings;
 
@@ -842,7 +849,7 @@ function SettingsDialog({ api }) {
   );
 }
 
-function TopBar({ title, subtitle, right }) {
+function TopBar({ title, subtitle, right }: { title: string; subtitle?: string; right?: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div>
@@ -854,7 +861,7 @@ function TopBar({ title, subtitle, right }) {
   );
 }
 
-function StatChip({ label, value }) {
+function StatChip({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white/80 px-3 py-2 text-sm shadow-sm">
       <span className="text-slate-500">{label}</span>
@@ -895,7 +902,7 @@ function buildDeck({ mode, progress, shuffleLearn }) {
   return shuffle(idsAll);
 }
 
-function StudySession({ api, mode, onExit }) {
+function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: string; onExit: () => void }) {
   const { progress, patchId } = api;
   const settings = progress.settings;
   const theme = MODE_META[mode] || MODE_META.learn;
@@ -1248,7 +1255,7 @@ function StudySession({ api, mode, onExit }) {
   );
 }
 
-function ManageList({ api, onBack }) {
+function ManageList({ api, onBack }: { api: UseProgressReturn; onBack: () => void }) {
   const { progress } = api;
   const [q, setQ] = useState("");
 
