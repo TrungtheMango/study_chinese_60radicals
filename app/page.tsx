@@ -593,7 +593,7 @@ function todayStart() {
   return d;
 }
 
-function iso(d) {
+function iso(d: Date): string {
   return d.toISOString();
 }
 
