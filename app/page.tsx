@@ -977,7 +977,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
 
     [sBackRef, sCorrectRef, sFinishRef, sFlipRef, sNextRef, sSelectRef, sWrongRef].forEach((r) => {
       if (!r.current) return;
-      r.current.volume = 0.4;
+      r.current.volume = 0.2;
       r.current.preload = "auto";
       r.current.load();
     });
