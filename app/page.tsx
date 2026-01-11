@@ -953,7 +953,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
     return { correct, options };
   }, [mode, card.id]);
 
-  const grade = (g) => {
+  const grade = (g: number) => {
     const currentBox = pr.box || 1;
     const nextBox = applyGrade(currentBox, g);
     const t = todayStart();
@@ -981,7 +981,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
 
   useEffect(() => {
     if (!settings.keyboardShortcuts) return;
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onExit?.();
       if (e.key === " ") {
         e.preventDefault();
@@ -1364,7 +1364,7 @@ export default function Radicals60StudySite() {
   const { progress } = api;
 
   const [page, setPage] = useState("home");
-  const [mode, setMode] = useState("learn");
+  const [mode, setMode] = useState<ModeType>("learn");
 
   const dueCount = useMemo(() => {
     const t = todayStart();
@@ -1514,7 +1514,7 @@ export default function Radicals60StudySite() {
                       { key: "learn", meta: MODE_META.learn, desc: "Flashcard lật & chấm" },
                       { key: "review", meta: MODE_META.review, desc: "Ưu tiên thẻ đến hạn" },
                       { key: "quiz", meta: MODE_META.quiz, desc: "Bộ thủ → ý nghĩa" },
-                    ].map((m) => (
+                    ].map((m: { key: string; meta: typeof MODE_META.learn; desc: string }) => (
                       <button
                         key={m.key}
                         onClick={() => setMode(m.key)}
