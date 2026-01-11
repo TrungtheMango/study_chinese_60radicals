@@ -871,7 +871,7 @@ function StatChip({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function formatPinyin(r, toneMarks) {
+function formatPinyin(r: typeof RADICALS[0], toneMarks: boolean) {
   return toneMarks ? r.pinyin : normalize(r.pinyin);
 }
 
@@ -879,14 +879,14 @@ function formatPinyin(r, toneMarks) {
 // 2 Hard: box stays
 // 3 Good: box +1
 // 4 Easy: box +2
-function applyGrade(currentBox, grade) {
+function applyGrade(currentBox: number, grade: number) {
   if (grade === 1) return 1;
   if (grade === 2) return Math.max(1, currentBox);
   if (grade === 3) return Math.min(5, currentBox + 1);
   return Math.min(5, currentBox + 2);
 }
 
-function buildDeck({ mode, progress, shuffleLearn }) {
+function buildDeck({ mode, progress, shuffleLearn }: { mode: string; progress: ProgressState; shuffleLearn: boolean }) {
   const idsAll = RADICALS.map((r) => r.id);
 
   if (mode === "learn") {
