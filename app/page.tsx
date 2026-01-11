@@ -913,7 +913,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
   const [deck, setDeck] = useState(() => buildDeck({ mode, progress, shuffleLearn: settings.shuffleLearn }));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [quizChoice, setQuizChoice] = useState(null);
+  const [quizChoice, setQuizChoice] = useState<string | null>(null);
   const [quizReveal, setQuizReveal] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -1005,9 +1005,10 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
   };
 
   const nextQuiz = () => {
-    const isCorrect = quizChoice === quiz.correct;
-    grade(isCorrect ? 3 : 1);
-  };
+  if (!quiz) return;
+  const isCorrect = quizChoice === quiz.correct;
+  grade(isCorrect ? 3 : 1);
+};
 
   const timeStr = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
@@ -1405,7 +1406,7 @@ export default function Radicals60StudySite() {
                   <div className="grid gap-3 md:grid-cols-3">
                     <button
                       onClick={() => {
-                        setMode("learn");
+                        setMode("learn" as ModeType);
                         setPage("select");
                       }}
                       className="rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:bg-sky-50"
@@ -1423,7 +1424,7 @@ export default function Radicals60StudySite() {
 
                     <button
                       onClick={() => {
-                        setMode("review");
+                        setMode("review" as ModeType);
                         setPage("select");
                       }}
                       className="rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:bg-amber-50"
@@ -1441,7 +1442,7 @@ export default function Radicals60StudySite() {
 
                     <button
                       onClick={() => {
-                        setMode("quiz");
+                        setMode("quiz" as ModeType);
                         setPage("select");
                       }}
                       className="rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:bg-violet-50"
@@ -1517,7 +1518,7 @@ export default function Radicals60StudySite() {
                     ].map((m: { key: string; meta: typeof MODE_META.learn; desc: string }) => (
                       <button
                         key={m.key}
-                        onClick={() => setMode(m.key)}
+                        onClick={() => setMode(m.key as ModeType)}
                         className={
                           "rounded-2xl border p-4 text-left transition " +
                           (mode === m.key ? `border-slate-300 ${m.meta.soft}` : "border-slate-200 bg-white hover:bg-slate-50")
