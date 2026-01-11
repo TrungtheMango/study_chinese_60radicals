@@ -13,6 +13,7 @@ import {
   Settings,
   Sparkles,
   Timer,
+  XCircle,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -603,7 +604,6 @@ function addDays(d: Date, days: number): Date {
   return x;
 }
 
-
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -621,7 +621,6 @@ function normalize(s: string): string {
     .trim();
 }
 
-
 // Leitner-ish intervals (days)
 function intervalByBox(box: number): number {
   if (box <= 1) return 0;
@@ -630,7 +629,6 @@ function intervalByBox(box: number): number {
   if (box === 4) return 7;
   return 14;
 }
-
 
 type ProgressItem = {
   box: number;
@@ -686,7 +684,6 @@ function emptyProgress(): ProgressState {
   };
 }
 
-
 function loadProgress() {
   try {
     const raw = localStorage.getItem(LS_KEY);
@@ -706,7 +703,6 @@ function saveProgress(state: unknown): void {
     // ignore
   }
 }
-
 
 function useProgress() {
   const [progress, setProgress] = useState(() => loadProgress() || emptyProgress());
@@ -766,7 +762,6 @@ const MODE_META = {
 
 type ModeType = keyof typeof MODE_META;
 
-
 function SmallKbd({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-xl border border-slate-200 bg-white/70 px-2 py-1 text-xs text-slate-600 shadow-sm">
@@ -774,7 +769,6 @@ function SmallKbd({ children }: { children: React.ReactNode }) {
     </span>
   );
 }
-
 
 function SettingsDialog({ api }: { api: UseProgressReturn }) {
   const { progress, patchSettings, resetAll } = api;
@@ -791,9 +785,7 @@ function SettingsDialog({ api }: { api: UseProgressReturn }) {
       <DialogContent className="rounded-2xl">
         <DialogHeader>
           <DialogTitle>Cài đặt</DialogTitle>
-          <DialogDescription>
-            Tùy chỉnh hiển thị và phím tắt. Tiến độ lưu trên trình duyệt.
-          </DialogDescription>
+          <DialogDescription>Tùy chỉnh hiển thị và phím tắt. Tiến độ lưu trên trình duyệt.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -913,8 +905,13 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
   const [deck, setDeck] = useState(() => buildDeck({ mode, progress, shuffleLearn: settings.shuffleLearn }));
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+
+  // --- QUIZ STATES (mới) ---
   const [quizChoice, setQuizChoice] = useState<string | null>(null);
   const [quizReveal, setQuizReveal] = useState(false);
+  const [quizIsCorrect, setQuizIsCorrect] = useState<boolean | null>(null);
+  const [quizSession, setQuizSession] = useState({ total: 0, correct: 0, wrong: 0 });
+
   const [seconds, setSeconds] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -922,22 +919,26 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
     setDeck(buildDeck({ mode, progress, shuffleLearn: settings.shuffleLearn }));
     setIndex(0);
     setFlipped(false);
+
+    // reset quiz mỗi lần đổi mode hoặc shuffleLearn
     setQuizChoice(null);
     setQuizReveal(false);
+    setQuizIsCorrect(null);
+    setQuizSession({ total: 0, correct: 0, wrong: 0 });
   }, [mode, settings.shuffleLearn]);
 
   useEffect(() => {
-  timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
-  return () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-  };
-}, []);
+    timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   const id = deck[index] ?? deck[0];
   const card = useMemo(() => RADICALS.find((r) => r.id === id) || RADICALS[0], [id]);
-  const pr = progress.byId[card.id] || { box: 1, correct: 0, wrong: 0, due: iso(todayStart()) };
+  const pr = progress.byId[card.id] || { box: 1, correct: 0, wrong: 0, due: iso(todayStart()), learned: false };
 
   const total = deck.length || 1;
   const pct = Math.round(((index + 1) / total) * 100);
@@ -953,7 +954,16 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
     return { correct, options };
   }, [mode, card.id]);
 
-  const grade = (g: number) => {
+  const goNext = () => {
+    setFlipped(false);
+    setQuizChoice(null);
+    setQuizReveal(false);
+    setQuizIsCorrect(null);
+    setIndex((i) => (i + 1 < deck.length ? i + 1 : 0));
+  };
+
+  // dùng cho learn/review: chấm điểm + sang thẻ kế
+  const gradeAndNext = (g: number) => {
     const currentBox = pr.box || 1;
     const nextBox = applyGrade(currentBox, g);
     const t = todayStart();
@@ -968,10 +978,25 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
       wrong: (pr.wrong || 0) + (g <= 2 ? 1 : 0),
     });
 
-    setFlipped(false);
-    setQuizChoice(null);
-    setQuizReveal(false);
-    setIndex((i) => (i + 1 < deck.length ? i + 1 : 0));
+    goNext();
+  };
+
+  // dùng cho quiz: ghi kết quả vào progress nhưng KHÔNG tự sang thẻ (chỉ sang khi bấm "Tiếp")
+  const recordQuizResult = (isCorrect: boolean) => {
+    const g = isCorrect ? 3 : 1; // đúng: tương đương "Good", sai: "Again"
+    const currentBox = pr.box || 1;
+    const nextBox = applyGrade(currentBox, g);
+    const t = todayStart();
+    const due = addDays(t, intervalByBox(nextBox));
+
+    patchId(card.id, {
+      box: nextBox,
+      learned: pr.learned || isCorrect,
+      lastReviewed: new Date().toISOString(),
+      due: iso(due),
+      correct: (pr.correct || 0) + (isCorrect ? 1 : 0),
+      wrong: (pr.wrong || 0) + (!isCorrect ? 1 : 0),
+    });
   };
 
   const handleFlip = () => {
@@ -989,10 +1014,10 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
       }
       if (mode !== "quiz") {
         if (!flipped) return;
-        if (e.key === "1") grade(1);
-        if (e.key === "2") grade(2);
-        if (e.key === "3") grade(3);
-        if (e.key === "4") grade(4);
+        if (e.key === "1") gradeAndNext(1);
+        if (e.key === "2") gradeAndNext(2);
+        if (e.key === "3") gradeAndNext(3);
+        if (e.key === "4") gradeAndNext(4);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -1001,14 +1026,27 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
 
   const submitQuiz = () => {
     if (!quiz || quizChoice == null) return;
+    if (quizReveal) return;
+
+    const ok = quizChoice === quiz.correct;
     setQuizReveal(true);
+    setQuizIsCorrect(ok);
+
+    // tính đúng/sai của "lần kiểm tra" (session) chính xác
+    setQuizSession((s) => ({
+      total: s.total + 1,
+      correct: s.correct + (ok ? 1 : 0),
+      wrong: s.wrong + (ok ? 0 : 1),
+    }));
+
+    // ghi vào progress ngay lúc nộp (tránh trường hợp nộp rồi thoát mà không bấm Tiếp)
+    recordQuizResult(ok);
   };
 
   const nextQuiz = () => {
-  if (!quiz) return;
-  const isCorrect = quizChoice === quiz.correct;
-  grade(isCorrect ? 3 : 1);
-};
+    if (!quiz) return;
+    goNext();
+  };
 
   const timeStr = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
@@ -1022,10 +1060,21 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
           </Button>
           <Badge className={`rounded-2xl border ${theme.chip}`}>{theme.label}</Badge>
         </div>
+
         <div className="flex items-center gap-2">
           <StatChip label="Thẻ" value={`${index + 1}/${total}`} />
-          <StatChip label="Box" value={pr.box || 1} />
-          <StatChip label="Time" value={timeStr} />
+          {mode === "quiz" ? (
+            <>
+              <StatChip label="Đúng" value={quizSession.correct} />
+              <StatChip label="Sai" value={quizSession.wrong} />
+              <StatChip label="Time" value={timeStr} />
+            </>
+          ) : (
+            <>
+              <StatChip label="Box" value={pr.box || 1} />
+              <StatChip label="Time" value={timeStr} />
+            </>
+          )}
         </div>
       </div>
 
@@ -1045,9 +1094,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                 ID {card.id}
               </Badge>
             </CardTitle>
-            <div className="text-sm text-slate-600">
-              {mode === "quiz" ? "Bộ thủ → Ý nghĩa" : "Space để lật, 1–4 để chấm"}
-            </div>
+            <div className="text-sm text-slate-600">{mode === "quiz" ? "Bộ thủ → Ý nghĩa" : "Space để lật, 1–4 để chấm"}</div>
           </CardHeader>
 
           <CardContent className="p-4">
@@ -1060,12 +1107,8 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <div className="text-sm text-slate-600">Bộ thủ</div>
-                      <div className="mt-2 text-5xl md:text-6xl font-semibold tracking-wide text-slate-900">
-                        {card.radical}
-                      </div>
-                      <div className="mt-3 text-sm text-slate-600">
-                        {flipped ? "Đáp án" : "Tự nhớ: tên VN, pinyin, ý nghĩa"}
-                      </div>
+                      <div className="mt-2 text-5xl md:text-6xl font-semibold tracking-wide text-slate-900">{card.radical}</div>
+                      <div className="mt-3 text-sm text-slate-600">{flipped ? "Đáp án" : "Tự nhớ: tên VN, pinyin, ý nghĩa"}</div>
                     </div>
                     <div className="hidden md:block">
                       <Badge className={`rounded-2xl border ${theme.chip}`}>Box {pr.box || 1}</Badge>
@@ -1088,9 +1131,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                           </div>
                           <div className="rounded-2xl border border-slate-200 bg-violet-50/50 p-4">
                             <div className="text-xs text-slate-600">Pinyin</div>
-                            <div className="mt-1 text-lg font-semibold text-slate-900">
-                              {formatPinyin(card, settings.toneMarks)}
-                            </div>
+                            <div className="mt-1 text-lg font-semibold text-slate-900">{formatPinyin(card, settings.toneMarks)}</div>
                           </div>
                         </div>
 
@@ -1111,10 +1152,7 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                             <div className="text-xs text-slate-600">Ví dụ</div>
                             <div className="mt-2 flex flex-wrap gap-2">
                               {card.examples.map((e) => (
-                                <Badge
-                                  key={e}
-                                  className="rounded-2xl border border-slate-200 bg-white text-base text-slate-800"
-                                >
+                                <Badge key={e} className="rounded-2xl border border-slate-200 bg-white text-base text-slate-800">
                                   {e}
                                 </Badge>
                               ))}
@@ -1129,37 +1167,78 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                 <div className="space-y-4">
                   <div>
                     <div className="text-sm text-slate-600">Bộ thủ</div>
-                    <div className="mt-2 text-5xl md:text-6xl font-semibold tracking-wide text-slate-900">
-                      {card.radical}
-                    </div>
+                    <div className="mt-2 text-5xl md:text-6xl font-semibold tracking-wide text-slate-900">{card.radical}</div>
                   </div>
 
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <div className="text-sm text-slate-800">Chọn ý nghĩa gần đúng nhất</div>
+
                     <div className="mt-3 grid gap-2">
                       {quiz?.options?.map((opt) => {
                         const picked = quizChoice === opt;
-                        const correct = quizReveal && opt === quiz.correct;
-                        const wrong = quizReveal && picked && opt !== quiz.correct;
+                        const isCorrectOpt = opt === quiz.correct;
+
+                        // sau khi nộp:
+                        const showCorrect = quizReveal && isCorrectOpt;
+                        const showWrongPicked = quizReveal && picked && !isCorrectOpt;
+                        const showPickedCorrect = quizReveal && picked && isCorrectOpt;
+
+                        const base = "rounded-2xl border p-3 text-left transition";
+
+                        // trước khi nộp: option được chọn phải nổi bật (sáng màu hơn)
+                        const beforeReveal =
+                          !quizReveal && picked
+                            ? " border-slate-400 bg-slate-50 ring-2 ring-slate-200"
+                            : !quizReveal
+                            ? " border-slate-200 bg-white hover:bg-slate-50"
+                            : " border-slate-200 bg-white";
+
+                        // sau khi nộp: xanh cho đúng, đỏ cho lựa chọn sai
+                        const afterReveal =
+                          quizReveal && showCorrect
+                            ? " border-emerald-200 bg-emerald-50"
+                            : quizReveal && showWrongPicked
+                            ? " border-rose-200 bg-rose-50"
+                            : "";
+
+                        // nếu chọn đúng, nhấn mạnh thêm
+                        const afterRevealEmphasis = quizReveal && showPickedCorrect ? " ring-2 ring-emerald-200" : "";
+
                         return (
                           <button
                             key={opt}
-                            onClick={() => !quizReveal && setQuizChoice(opt)}
-                            className={
-                              "rounded-2xl border p-3 text-left transition " +
-                              (picked && !quizReveal ? "border-slate-300 bg-white" : "border-slate-200 bg-white") +
-                              (correct ? " border-emerald-200 bg-emerald-50" : "") +
-                              (wrong ? " border-rose-200 bg-rose-50" : "")
-                            }
+                            onClick={() => {
+                              if (quizReveal) return;
+                              setQuizChoice(opt);
+                            }}
+                            className={`${base}${beforeReveal}${afterReveal}${afterRevealEmphasis}`}
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div className="text-sm md:text-base text-slate-900">{opt}</div>
-                              {correct && <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
+                              <div className="flex items-center gap-2">
+                                {quizReveal && showCorrect && <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
+                                {quizReveal && showWrongPicked && <XCircle className="h-5 w-5 text-rose-600" />}
+                              </div>
                             </div>
                           </button>
                         );
                       })}
                     </div>
+
+                    {quizReveal && (
+                      <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-sm font-semibold text-slate-900">
+                            {quizIsCorrect ? "Đúng rồi ✅" : "Sai rồi ❌"}
+                          </div>
+                          <Badge className={`rounded-2xl border ${quizIsCorrect ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
+                            {quizIsCorrect ? "Correct" : "Wrong"}
+                          </Badge>
+                        </div>
+                        <div className="mt-2 text-sm text-slate-600">Đáp án đúng</div>
+                        <div className="mt-1 font-semibold text-slate-900">{quiz?.correct}</div>
+                      </div>
+                    )}
                   </div>
 
                   {!quizReveal ? (
@@ -1167,13 +1246,9 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                       Nộp
                     </Button>
                   ) : (
-                    <div className="space-y-2">
-                      <div className="text-sm text-slate-600">Đáp án đúng</div>
-                      <div className="font-semibold text-slate-900">{quiz?.correct}</div>
-                      <Button className={`rounded-2xl ${theme.solid}`} onClick={nextQuiz}>
-                        Tiếp
-                      </Button>
-                    </div>
+                    <Button className={`rounded-2xl ${theme.solid}`} onClick={nextQuiz}>
+                      Tiếp
+                    </Button>
                   )}
                 </div>
               )}
@@ -1194,16 +1269,16 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
                   </div>
                 ) : (
                   <div className="grid gap-2 md:grid-cols-4">
-                    <Button variant="secondary" className="rounded-2xl bg-white hover:bg-slate-50" onClick={() => grade(1)}>
+                    <Button variant="secondary" className="rounded-2xl bg-white hover:bg-slate-50" onClick={() => gradeAndNext(1)}>
                       1 Again
                     </Button>
-                    <Button variant="secondary" className="rounded-2xl bg-white hover:bg-slate-50" onClick={() => grade(2)}>
+                    <Button variant="secondary" className="rounded-2xl bg-white hover:bg-slate-50" onClick={() => gradeAndNext(2)}>
                       2 Hard
                     </Button>
-                    <Button className={`rounded-2xl ${theme.solid}`} onClick={() => grade(3)}>
+                    <Button className={`rounded-2xl ${theme.solid}`} onClick={() => gradeAndNext(3)}>
                       3 Good
                     </Button>
-                    <Button className={`rounded-2xl ${theme.solid}`} onClick={() => grade(4)}>
+                    <Button className={`rounded-2xl ${theme.solid}`} onClick={() => gradeAndNext(4)}>
                       4 Easy
                     </Button>
                     {settings.keyboardShortcuts && (
@@ -1228,19 +1303,34 @@ function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: Mod
             </CardTitle>
             <div className="text-sm text-slate-600">Nhẹ, tập trung, nhưng có màu để dễ nhìn hơn.</div>
           </CardHeader>
+
           <CardContent className="space-y-3">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="text-sm text-slate-600">Hạn ôn</div>
-              <div className="mt-1 text-base font-semibold text-slate-900">{new Date(pr.due).toLocaleDateString()}</div>
-            </div>
+            {mode === "quiz" ? (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="text-sm text-slate-600">Kết quả lần kiểm tra</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Badge className="rounded-2xl border border-slate-200 bg-slate-50 text-slate-700">Tổng: {quizSession.total}</Badge>
+                  <Badge className="rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-700">Đúng: {quizSession.correct}</Badge>
+                  <Badge className="rounded-2xl border border-rose-200 bg-rose-50 text-rose-700">Sai: {quizSession.wrong}</Badge>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="text-sm text-slate-600">Hạn ôn</div>
+                <div className="mt-1 text-base font-semibold text-slate-900">{new Date(pr.due).toLocaleDateString()}</div>
+              </div>
+            )}
+
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="text-sm text-slate-600">Thống kê thẻ này</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 <Badge className="rounded-2xl border border-slate-200 bg-emerald-50 text-emerald-700">Đúng: {pr.correct || 0}</Badge>
                 <Badge className="rounded-2xl border border-slate-200 bg-rose-50 text-rose-700">Sai: {pr.wrong || 0}</Badge>
                 <Badge className="rounded-2xl border border-slate-200 bg-slate-50 text-slate-700">Learned: {pr.learned ? "Yes" : "No"}</Badge>
+                <Badge className="rounded-2xl border border-slate-200 bg-white text-slate-700">Box {pr.box || 1}</Badge>
               </div>
             </div>
+
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="text-sm text-slate-600">Mẹo dùng nhanh</div>
               <div className="mt-2 space-y-2 text-sm text-slate-800">
@@ -1291,19 +1381,15 @@ function ManageList({ api, onBack }: { api: UseProgressReturn; onBack: () => voi
       />
 
       <div className="relative">
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Tìm… (vd: 氵, shuǐ, nước, 路)"
-          className="rounded-2xl bg-white/80"
-        />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm… (vd: 氵, shuǐ, nước, 路)" className="rounded-2xl bg-white/80" />
       </div>
 
       <Card className="rounded-2xl shadow-sm border-slate-200 bg-white/80">
         <CardHeader className="space-y-2">
           <CardTitle className="flex items-center justify-between gap-3 text-lg">
             <span className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-sky-700" />Tất cả
+              <BookOpen className="h-5 w-5 text-sky-700" />
+              Tất cả
             </span>
             <Badge className="rounded-2xl border border-slate-200 bg-slate-50 text-slate-700">{list.length}/60</Badge>
           </CardTitle>
@@ -1313,13 +1399,7 @@ function ManageList({ api, onBack }: { api: UseProgressReturn; onBack: () => voi
             {list.map((r) => {
               const pr = progress.byId[r.id] || { box: 1, learned: false };
               return (
-                <div
-                  key={r.id}
-                  className={
-                    "rounded-2xl border border-slate-200 bg-white p-3 " +
-                    (pr.learned ? "ring-1 ring-emerald-100" : "")
-                  }
-                >
+                <div key={r.id} className={"rounded-2xl border border-slate-200 bg-white p-3 " + (pr.learned ? "ring-1 ring-emerald-100" : "")}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div className="text-sm font-semibold text-slate-900">
@@ -1341,9 +1421,7 @@ function ManageList({ api, onBack }: { api: UseProgressReturn; onBack: () => voi
                       <Badge
                         className={
                           "rounded-2xl border " +
-                          (pr.learned
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : "border-slate-200 bg-slate-50 text-slate-700")
+                          (pr.learned ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-700")
                         }
                       >
                         {pr.learned ? "Đã học" : "Chưa"}
@@ -1462,13 +1540,11 @@ export default function Radicals60StudySite() {
                   <Separator />
 
                   <div className="flex flex-wrap gap-2">
-                    <Button className={`rounded-2xl gap-2 ${theme.solid}`} onClick={() => setPage("select")}
-                    >
+                    <Button className={`rounded-2xl gap-2 ${theme.solid}`} onClick={() => setPage("select")}>
                       Vào Study
                       <ChevronRight className="h-4 w-4" />
                     </Button>
-                    <Button variant="secondary" className="rounded-2xl bg-white/70 hover:bg-white" onClick={() => setPage("list")}
-                    >
+                    <Button variant="secondary" className="rounded-2xl bg-white/70 hover:bg-white" onClick={() => setPage("list")}>
                       Xem danh sách
                     </Button>
                   </div>
@@ -1536,17 +1612,14 @@ export default function Radicals60StudySite() {
                   <Separator />
 
                   <div className="flex flex-wrap gap-2">
-                    <Button className={`rounded-2xl gap-2 ${theme.solid}`} onClick={() => setPage("session")}
-                    >
+                    <Button className={`rounded-2xl gap-2 ${theme.solid}`} onClick={() => setPage("session")}>
                       Start
                       <ChevronRight className="h-4 w-4" />
                     </Button>
-                    <Button variant="secondary" className="rounded-2xl bg-white/70 hover:bg-white" onClick={() => setPage("home")}
-                    >
+                    <Button variant="secondary" className="rounded-2xl bg-white/70 hover:bg-white" onClick={() => setPage("home")}>
                       Quay về
                     </Button>
-                    <Button variant="secondary" className="rounded-2xl bg-white/70 hover:bg-white" onClick={() => setPage("list")}
-                    >
+                    <Button variant="secondary" className="rounded-2xl bg-white/70 hover:bg-white" onClick={() => setPage("list")}>
                       Danh sách
                     </Button>
                   </div>
@@ -1569,9 +1642,15 @@ export default function Radicals60StudySite() {
                   <div className="rounded-2xl border border-slate-200 bg-white p-4">
                     <div className="text-sm text-slate-600">Phím tắt</div>
                     <div className="mt-2 space-y-2 text-sm text-slate-800">
-                      <div><SmallKbd>Space</SmallKbd> lật thẻ</div>
-                      <div><SmallKbd>1</SmallKbd> Again • <SmallKbd>2</SmallKbd> Hard • <SmallKbd>3</SmallKbd> Good • <SmallKbd>4</SmallKbd> Easy</div>
-                      <div><SmallKbd>Esc</SmallKbd> thoát</div>
+                      <div>
+                        <SmallKbd>Space</SmallKbd> lật thẻ
+                      </div>
+                      <div>
+                        <SmallKbd>1</SmallKbd> Again • <SmallKbd>2</SmallKbd> Hard • <SmallKbd>3</SmallKbd> Good • <SmallKbd>4</SmallKbd> Easy
+                      </div>
+                      <div>
+                        <SmallKbd>Esc</SmallKbd> thoát
+                      </div>
                     </div>
                   </div>
                 </CardContent>
