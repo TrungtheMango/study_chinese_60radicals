@@ -632,9 +632,30 @@ function intervalByBox(box: number): number {
 }
 
 
-function emptyProgress() {
-  const base = {};
+type ProgressItem = {
+  box: number;
+  learned: boolean;
+  correct: number;
+  wrong: number;
+  lastReviewed: string | null;
+  due: string;
+};
+
+type ProgressState = {
+  byId: Record<number, ProgressItem>;
+  settings: {
+    showExamples: boolean;
+    showMnemonic: boolean;
+    toneMarks: boolean;
+    shuffleLearn: boolean;
+    keyboardShortcuts: boolean;
+  };
+};
+
+function emptyProgress(): ProgressState {
+  const base: Record<number, ProgressItem> = {};
   const t = todayStart();
+
   for (const r of RADICALS) {
     base[r.id] = {
       box: 1,
@@ -645,6 +666,7 @@ function emptyProgress() {
       due: iso(t),
     };
   }
+
   return {
     byId: base,
     settings: {
@@ -656,6 +678,7 @@ function emptyProgress() {
     },
   };
 }
+
 
 function loadProgress() {
   try {
