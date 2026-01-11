@@ -764,6 +764,9 @@ const MODE_META = {
   },
 };
 
+type ModeType = keyof typeof MODE_META;
+
+
 function SmallKbd({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-xl border border-slate-200 bg-white/70 px-2 py-1 text-xs text-slate-600 shadow-sm">
@@ -886,7 +889,7 @@ function applyGrade(currentBox: number, grade: number) {
   return Math.min(5, currentBox + 2);
 }
 
-function buildDeck({ mode, progress, shuffleLearn }: { mode: string; progress: ProgressState; shuffleLearn: boolean }) {
+function buildDeck({ mode, progress, shuffleLearn }: { mode: ModeType; progress: ProgressState; shuffleLearn: boolean }) {
   const idsAll = RADICALS.map((r) => r.id);
 
   if (mode === "learn") {
@@ -902,7 +905,7 @@ function buildDeck({ mode, progress, shuffleLearn }: { mode: string; progress: P
   return shuffle(idsAll);
 }
 
-function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: string; onExit: () => void }) {
+function StudySession({ api, mode, onExit }: { api: UseProgressReturn; mode: ModeType; onExit: () => void }) {
   const { progress, patchId } = api;
   const settings = progress.settings;
   const theme = MODE_META[mode] || MODE_META.learn;
